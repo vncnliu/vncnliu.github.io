@@ -86,7 +86,7 @@
 <meta property="og:url" content="http://yoursite.com/2016/04/20/java读取部分excel文件实现excel文件的预览/index.html">
 <meta property="og:site_name" content="Attack On Vncnliu">
 <meta property="og:description" content="一个报表导入的需求要求在保存导入数据前可以预览部分数据，本来直接用poi从文件得到workbook后直接取前十行返回预览。做完后发现在excel表格非常大的时候从流构建workbook要挺长时间，体验有点不好。要是能读取部分流展示就完美了。看了一下poi构建workbook的源码，自己写了个测试用例结果失败了……好在有google找到了这个Excel Streaming Reader使用起来还是比">
-<meta property="og:updated_time" content="2016-04-21T09:18:56.447Z">
+<meta property="og:updated_time" content="2016-05-05T06:53:53.002Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="java读取部分excel文件实现excel文件的预览">
 <meta name="twitter:description" content="一个报表导入的需求要求在保存导入数据前可以预览部分数据，本来直接用poi从文件得到workbook后直接取前十行返回预览。做完后发现在excel表格非常大的时候从流构建workbook要挺长时间，体验有点不好。要是能读取部分流展示就完美了。看了一下poi构建workbook的源码，自己写了个测试用例结果失败了……好在有google找到了这个Excel Streaming Reader使用起来还是比">
@@ -114,6 +114,15 @@
 
   
 
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-76129019-1', 'auto');
+  ga('send', 'pageview');
+</script>
 
 
 
@@ -303,7 +312,9 @@
       
 
       
-        <p>一个报表导入的需求要求在保存导入数据前可以预览部分数据，本来直接用poi从文件得到workbook后直接取前十行返回预览。做完后发现在excel表格非常大的时候从流构建workbook要挺长时间，体验有点不好。要是能读取部分流展示就完美了。看了一下poi构建workbook的源码，自己写了个测试用例结果失败了……<br>好在有google找到了这个<a href="https://github.com/monitorjbl/excel-streaming-reader" target="_blank" rel="external">Excel Streaming Reader</a>使用起来还是比较简单的就不多说了<br>比较遗憾的是这个不支持excel2003</p>
+        <p>一个报表导入的需求要求在保存导入数据前可以预览部分数据，本来直接用poi从文件得到workbook后直接取前十行返回预览。做完后发现在excel表格非常大的时候从流构建workbook要挺长时间，体验有点不好。要是能读取部分流展示就完美了。看了一下poi构建workbook的源码，自己写了个测试用例结果失败了……好在有google找到了这个<a href="https://github.com/monitorjbl/excel-streaming-reader" target="_blank" rel="external">Excel Streaming Reader</a>使用起来还是比较简单的<br>添加maven库<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.monitorjbl<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>xlsx-streamer<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.2.12<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>使用示例<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.monitorjbl.xlsx.StreamingReader;</span><br><span class="line"></span><br><span class="line">InputStream is = <span class="keyword">new</span> FileInputStream(<span class="keyword">new</span> File(<span class="string">"/path/to/workbook.xlsx"</span>));</span><br><span class="line">StreamingReader reader = StreamingReader.builder()</span><br><span class="line">        .rowCacheSize(<span class="number">100</span>)    <span class="comment">// number of rows to keep in memory (defaults to 10)</span></span><br><span class="line">        .bufferSize(<span class="number">4096</span>)     <span class="comment">// buffer size to use when reading InputStream to file (defaults to 1024)</span></span><br><span class="line">        .sheetIndex(<span class="number">0</span>)        <span class="comment">// index of sheet to use (defaults to 0)</span></span><br><span class="line">        .read(is);            <span class="comment">// InputStream or File for XLSX file (required)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (Row r : reader) &#123;</span><br><span class="line">  <span class="keyword">for</span> (Cell c : r) &#123;</span><br><span class="line">    System.out.println(c.getStringCellValue());</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>比较遗憾的是这个不支持excel2003<br>以上是读取，当导出时文件过大导致OOM可以用<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//内存中只保留1000条记录</span></span><br><span class="line">SXSSFWorkbook workbook = <span class="keyword">new</span> SXSSFWorkbook(<span class="number">1000</span>);</span><br></pre></td></tr></table></figure></p>
 
       
     </div>
