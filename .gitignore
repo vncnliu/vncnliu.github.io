@@ -8,3 +8,4 @@ public/
 themes/
 .idea
 *.iml
+package-lock.json
