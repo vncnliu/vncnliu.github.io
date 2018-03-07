@@ -1,5 +1,5 @@
 ---
-title: idea下MybatisPlugin的使用test2
+title: idea下MybatisPlugin的使用test3
 date: 2016-04-07 16:46:46
 categories:
 - 生产力工具
