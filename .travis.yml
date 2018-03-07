@@ -2,7 +2,7 @@ language: node_js
 node_js: stable
 install:
   - npm install
-  - git clone https://github.com/changkun/hexo-theme-next themes/next
+  - git clone https://github.com/giscafer/hexo-theme-cafe.git themes/cafe
 script:
   - hexo g
 after_script:
