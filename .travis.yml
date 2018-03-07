@@ -18,3 +18,7 @@ branches:
 env:
  global:
    - GH_REF: github.com/vncnliu/vncnliu.github.io.git
+
+cache:
+  directories:
+    - node_modules
