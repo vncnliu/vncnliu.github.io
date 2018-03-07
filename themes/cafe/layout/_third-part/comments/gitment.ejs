@@ -3,6 +3,7 @@
 <link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
 <script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
 <script>
+    console.log(page);
     var gitment = new Gitment({
         id: '<%= page.date %>', // 可选。默认为 location.href
         owner: '<%=theme.gitment.owner%>',
@@ -12,6 +13,7 @@
             client_secret: '<%=theme.gitment.client_secret%>',
         }
     })
+    console.log(gitment);
     gitment.render(document.getElementById("gitment_comments"))
 </script>
 
