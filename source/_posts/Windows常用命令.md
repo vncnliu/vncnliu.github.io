@@ -1,0 +1,1 @@
+netstat -na | find /C "TCP" 统计tcp连接数量
