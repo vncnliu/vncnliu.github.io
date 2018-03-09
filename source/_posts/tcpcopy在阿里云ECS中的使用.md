@@ -1,11 +1,13 @@
 ---
 title: tcpcopy在阿里云ECS中的使用
 date: 2017-01-21 14:16:28
-categories:
+category:
 - 生产力工具
-tags:
+tag:
 - tcpcopy
-
+---
+这是摘要
+<!-- more -->
 ---
 tcpcopy是一个用于回放现网流量的工具，关于她的介绍和原理移步[tcpcopy](https://github.com/session-replay-tools/tcpcopy)。
 官方文档也不多，别管理解多少看还是要看的。

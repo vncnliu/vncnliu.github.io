@@ -2,34 +2,22 @@
 menu:
   首页: /
   归档: /archives
-  关于: /about
 rss: /atom.xml
 
 # footer底部显示联系邮箱（在博客配置文件下添加email配置也是一样的效果）
-email: 'youemail@outlook.com'
+email: 'vncnliu@gmail.com'
 
 # 内容 Content
 excerpt_link: 继续阅读全文 »
-fancybox: true
+fancybox: false
 
 # 启用social widgets时有效
 # 社交widget文本字体，不填写则不显示title
 social_title: Follow me
 # Social links 社交链接
 social:
-  github: https://github.com/giscafer
-  weibo: http://weibo.com/laohoubin
-  zhihu: http://www.zhihu.com/people/giscafer
-  email: 'youemail@outlook.com'
-
-# WeChat 微信公众号二维码url
-wechat_url: http://blog.giscafer.com/static/images/qrcode_giscafer.jpg ## 启用wechat widget才会生效
-
-
-# Friendly links 友情链接
-links:
-  giscafer's blog: http://blog.giscafer.com
-  GIS520社区: http://www.gis520.com
+  github: https://github.com/vncnliu
+  email: 'vncnliu@gmail.com'
 
 # 侧边栏 Sidebar，目前仅支持right
 sidebar: right
@@ -39,7 +27,7 @@ content_position: widget
 content_display_fixed: true
 
 # 文章底部推荐文章数,false关闭
-random_posts: 4
+random_posts: 3
 
 widgets:
 - social
@@ -91,24 +79,11 @@ mathjax:
 
 # 其他参数
 google_analytics:
-favicon: /favicon.png
+favicon: /favicon.ico
 
 
 # comments 评论插件
 # 关闭统一为 false
-
-## 网易云跟帖
-### 使用说明 http://cafe.giscafer.com/2017/04/14/gentie-test/
-gentie_productKey: e2fb4051c49842688ce669e634bc983f
-
-## 畅言 (不使用请将appid和appkey都设空或者false)
-### 使用说明：http://changyan.kuaizhan.com/static/help/
-changyan_appid: false  ##appid
-changyan_appkey: false  ##appkey
-## 友言
-### 使用说明
-### 填写友言用户ID http://www.uyan.cc/sites
-youyan_uid: false
 
 # gitment
 ## 教程：https://imsun.net/posts/gitment-introduction/ 网站上进行查看

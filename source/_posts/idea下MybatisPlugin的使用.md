@@ -1,12 +1,15 @@
 ---
 title: idea下MybatisPlugin的使用test3
 date: 2016-04-07 16:46:46
-categories:
+category:
 - 生产力工具
-tags:
+tag:
 - idea
 - MybatisPlugin
 - MBG
+---
+这是摘要
+<!-- more -->
 ---
 换用mybatis后这个mapper当字段多的时候真的是挺烦,作为先进生产力的代表idea当然有方法那就是MybatisPlugin。
 ### MybatisPlugin安装
