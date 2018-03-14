@@ -206,3 +206,9 @@ HTB
 top -H 显示线程信息
 10进制转16进制：
 　　$ echo "obase=16;ibase=10;100" | bc
+
+netcat(nc)
+
+telnet 
+
+watch
