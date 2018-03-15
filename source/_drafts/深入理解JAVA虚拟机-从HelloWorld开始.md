@@ -98,6 +98,16 @@ Constant pool:
 SourceFile: "HelloWorld.java"
 ```
 可以看到主要有常量池和两个方法，一构造方法一个main方法。
-ldc 将一个常量加载到操作数栈
-getstatic 将一个常量加载到虚拟机栈顶
+getstatic 将一个常量（这里即为常量池中的#2）加载到操作数栈顶
+ldc 将一个常量加载到操作数栈顶
+然后调用invokevirtual调用虚方法，即java/io/PrintStream.println方法，
+invokevirtual查看<method-spec>中给出的描述符，并确定该方法需要多少个参数（可能为零）。然后从操作数堆栈中弹出这些参数。接着将objectref从堆栈中弹出 。objectref是对其方法被调用的对象的引用。invokevirtual为objectref检索Java类，然后搜索由该类定义的方法列表，然后搜索其超类，找到名为methodname的方法，其描述符为描述符。
+
+一旦找到方法，invokevirtual就会调用该方法。首先，如果该方法被标记为同步，则输入与objectref关联的监视器 。接下来，在调用栈上建立一个新的栈帧结构。然后该方法的参数（从当前方法的操作数堆栈中弹出）被放置在新的堆栈帧结构的局部变量中。arg1存储在局部变量1中，arg2存储在局部变量2中，依此类推。objectref存储在局部变量0（用于特殊Java变量this的局部变量）中。最后，执行继续执行新方法的字节码中的第一条指令。
+
+当invokevirtual返回的方法返回时，任何单个（或双）字返回结果被放置在当前方法的操作数堆栈上，并且继续执行字节码中invokevirtual后面的指令。
+
+
+
+
 
