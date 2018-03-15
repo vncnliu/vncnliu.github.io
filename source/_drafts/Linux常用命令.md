@@ -212,3 +212,7 @@ netcat(nc)
 telnet 
 
 watch
+
+ss
+
+pidstat
