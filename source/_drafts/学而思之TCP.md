@@ -8,9 +8,9 @@ tags:
 ---
 先来两张图镇一下
 TCP协议头格式
-{% tcp协议头格式 TCP-Header-01.jpg %}
+{% asset_img TCP-Header-01.jpg TCP协议头格式 %}
 TCP状态图
-{% TCP状态图 Tcp_state_diagram_fixed-02.png %}
+{% asset_img Tcp_state_diagram_fixed-02.png TCP状态迁移 %}
 ###### 相关术语
 * Sequence number 包序号
 * ISN 初始包序列号
