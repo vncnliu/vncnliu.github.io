@@ -19,3 +19,10 @@ linux下执行如下代码临时更改
 ```shell
 echo 10 >> /proc/sys/net/ipv4/tcp_keepalive_time
 ```
+启动服务端客户端，此时应该能多抓到几个ACK的包，如果要在wireshark中显示的明显点需设置
+{% asset_img wireshark-config-02.png wireshark config %}
+由于此配置有
+* 配置需要在系统级别更改
+* 不能监控到应用级别
+所以一般都是自己实现心跳检测的功能
+###### SO_LINGER
