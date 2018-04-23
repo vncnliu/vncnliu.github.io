@@ -7,9 +7,7 @@ tag:
 - http
 - socket
 ---
-这是摘要
-<!-- more -->
----
+
 这里的HttpServer就是一个解析http协议的程序，大家都知道http协议是基于tcp/ip协议的。tcp/ip算是比较底层的了，操作系统基本都通过socket对其进行管理，用java很容易就能写一个简单的server
 ```java
 package cc.vicp.vncnliu.attackServer;

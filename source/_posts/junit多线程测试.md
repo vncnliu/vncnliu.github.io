@@ -7,9 +7,7 @@ tag:
 - junit
 - 多线程
 ---
-这是摘要
-<!-- more -->
----
+
 工作中难免要考虑一些方法是不是线程安全的，这时可以用junit进行简单的多线程测试。方式有很多种，可以使用grobo-utils不过grobo-utils没有放到maven公共仓库里，所以在maven项目中使用时还要把jar包打到本地仓库里，难免有些麻烦。
 其实还可以通过CountDownLatch很方便的实现。比如我写一个基于LinkedList简单的队列
 ```java

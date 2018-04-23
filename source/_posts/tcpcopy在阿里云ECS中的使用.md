@@ -6,9 +6,7 @@ category:
 tag:
 - tcpcopy
 ---
-这是摘要
-<!-- more -->
----
+
 tcpcopy是一个用于回放现网流量的工具，关于她的介绍和原理移步[tcpcopy](https://github.com/session-replay-tools/tcpcopy)。
 官方文档也不多，别管理解多少看还是要看的。
 tcpcopy的使用离不开tcpdump,离线模式下要用tcpdump抓取tcp包用于回放，在使用是也要用tcpdump进行抓包调试使tcpcopy能正常工作。

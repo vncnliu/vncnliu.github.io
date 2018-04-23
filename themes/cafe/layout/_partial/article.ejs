@@ -11,24 +11,28 @@
       </header>
     <% } %>
     <div class="article-entry" itemprop="articleBody">
-      <% if (post.excerpt && index){ %>
+      <% if (post.excerpt && index) { %>
         <%- post.excerpt %>
-        <% if (theme.excerpt_link){ %>
+        <% if (theme.excerpt_link) { %>
           <p class="article-more-link">
-            <a href="<%- url_for(post.path) %>#more"><%= theme.excerpt_link %></a>
+            <a href="<%- config.root %><%- post.path %>#more"><%= theme.excerpt_link %></a>
           </p>
         <% } %>
       <% } else { %>
-        <!-- Table of Contents -->
-        <% if (!index && post.toc!==false && toc(post.content) && theme.content_position==='post'){ %>
-        <div id="toc" class="toc-article">
-        <strong class="toc-title"><%= __('post_content') %></strong>
-        <%- toc(post.content) %>
-        </div>
+        <% var br = post.content.indexOf('\n') %>
+        <% if(br < 0 || !index) { %>
+          <%- post.content %>
+        <% } else { %>
+          <%- post.content.substring(0, br) %>
+          <% if (theme.excerpt_link) { %>
+            <p class="article-more-link">
+              <a href="<%- config.root %><%- post.path %>#more"><%= theme.excerpt_link %></a>
+            </p>
+          <% } %>
         <% } %>
-        <%- post.content %>
       <% } %>
     </div>
+
     <footer class="article-footer">
       <a data-url="<%- post.permalink %>" data-id="<%= post._id %>" class="article-share-link"><%= __('share') %></a>
       <% if (post.comments && theme.duoshuo_shortname){ %>

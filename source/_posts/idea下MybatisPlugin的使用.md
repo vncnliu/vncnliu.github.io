@@ -8,14 +8,14 @@ tag:
 - MybatisPlugin
 - MBG
 ---
-这是摘要
-<!-- more -->
----
+
 换用mybatis后这个mapper当字段多的时候真的是挺烦,作为先进生产力的代表idea当然有方法那就是MybatisPlugin。
+
 ### MybatisPlugin安装
 这个插件现在收费了,这里有一个破解版的[链接](http://yun.baidu.com/share/link?shareid=3257745653&uk=3005471020)。下下来从本地安装插件就行了。
 安装好重启idea后新建文件就会有mybatis_generaator_config文件了。
 {% asset_img 1.png mybatis_generaator_config %}
+
 ### MBG 配置
 配置文件可以看这个[文档](http://mbg.cndocs.tk/index.html)
 放一下我测试的配置：
