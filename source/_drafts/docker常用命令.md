@@ -77,3 +77,21 @@ $ sudo systemctl restart docker.service
 其他文档
 https://docs.docker.com/engine/security/
 什么是Docker
+
+
+清理所有停止运行的容器：
+
+docker container prune
+# or
+docker rm $(docker ps -aq)
+清理所有悬挂（<none>）镜像：
+
+docker image prune
+# or
+docker rmi $(docker images -qf "dangling=true")
+清理所有无用数据卷：
+
+docker volume prune
+
+# 进入容器
+docker exec -it 791c8ac9daeb bash
