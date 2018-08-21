@@ -88,16 +88,12 @@ favicon: /favicon.ico
 # gitment
 ## 教程：https://imsun.net/posts/gitment-introduction/ 网站上进行查看
 gitment:
-  enable: true #如果不使用则设置false关闭
+  enable: false #如果不使用则设置false关闭
   owner: vncnliu # 你的github名称或者id id的获取方式为https://api.github.com/users/forvoid（你的名称）中的id极为github id
   repo: vncnliu.github.io # 你的留言存放的位置 我的是放在我的github的github page上面
   client_id: 3a074b31408c9d6a0691 # Register a new OAuth application https://github.com/settings/applications/new
   client_secret: 11d6b1d0ea1433ad80e5f6d75e636e11b6eba688
 
 ## disqus
-disqus_shortname: false
-
-google_plus:
-fb_admins:
-fb_app_id:
+disqus_shortname: blog-vncnliu-top
 
