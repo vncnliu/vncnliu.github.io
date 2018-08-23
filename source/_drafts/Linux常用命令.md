@@ -1,3 +1,97 @@
+## nc
+``` shell
+Options:
+  -c, --close                close connection on EOF from stdin 收到EOF关闭连接
+  -e, --exec=PROGRAM         program to exec after connect 连接成功发给服务端执行语句
+  -g, --gateway=LIST         source-routing hop point[s], up to 8 IP协议相关
+  -G, --pointer=NUM          source-routing pointer: 4, 8, 12, ... IP协议相关
+  -h, --help                 display this help and exit
+  -i, --interval=SECS        delay interval for lines sent, ports scanned 延迟秒数
+  -l, --listen               listen mode, for inbound connects 监听模式
+  -L, --tunnel=ADDRESS:PORT  forward local port to remote address 端口转发
+  -n, --dont-resolve         numeric-only IP addresses, no DNS 使用数字IP地址
+  -o, --output=FILE          output hexdump traffic to FILE (implies -x) 文件输出
+  -p, --local-port=NUM       local port number 监听端口
+  -r, --randomize            randomize local and remote ports 随机端口
+  -s, --source=ADDRESS       local source address (ip or hostname) 制定本地IP地址（多网卡）
+  -t, --tcp                  TCP mode (default) 指定传输协议
+  -T, --telnet               answer using TELNET negotiation 使用TELNET协议应答
+  -u, --udp                  UDP mode 指定传输协议
+  -v, --verbose              verbose (use twice to be more verbose) 详细信息
+  -V, --version              output version information and exit 输出应用版本
+  -x, --hexdump              hexdump incoming and outgoing traffic 16进制显示输入输出数据
+  -w, --wait=SECS            timeout for connects and final net reads 超时时间
+  -z, --zero                 zero-I/O mode (used for scanning) 扫描模式
+
+```
+### 使任何进程成为服务器
+netcat可用于使任何进程成为网络服务器。它可以侦听端口并将其接收的输入传递给该进程。
+
+该-e选项产生可执行文件，其输入和输出通过网络套接字重定向。
+
+例如，可以将bourne shell进程公开给远程计算机。
+
+为此，在IP地址为192.168.1.2的计算机A上运行以下命令：
+``` shell
+$ nc -l -p 1234 -e / bin / sh
+```
+然后，从同一网络上的任何其他计算机，可以运行此nc命令：
+``` shell
+$ nc 192 .168.1.2 1234
+$ ls -las
+ total 4288
+4 drwxr-xr-x 15 imsovain users 4096 2009-02-17 07:47。
+4 drwxr-xr-x 4 imsovain user 4096 2009-01-18 21:22 ..
+8 -rw ------- 1 imsovain user 8192 2009-02-16 19:30 .bash_history
+4 -rw-r- -r-- 1 imsovain users 220 2009-01-18 21:04 .bash_logout
+...
+```
+### 代理
+另一个有用的行为是使用netcat作为代理。端口和主机都可以重定向。看看这个例子：
+``` shell
+nc -l 12345 | nc www.google.com 80
+```
+端口12345表示请求。
+``` shell
+netcat -L 127.0.0.1:22 -p 8080
+```
+侦听服务器的端口8080，当有人尝试连接时，转发到127.0.0.1:22
+
+这将在端口12345上启动nc服务器，并将所有连接重定向到google.com:80。如果网络浏览器向nc发出请求，该请求将被发送到谷歌，但响应将不会发送到网络浏览器。这是因为管道是单向的。这可以被合作周围有一个命名管道来重定向的输入和输出。
+
+另一个有用的功能是代理SSL连接。这样，无法在有线嗅探应用程序（如wireshark）中查看流量。这可以通过使用mkfifo，netcat和openssl在UNIX上完成。
+``` shell
+mkfifo tmp
+ mkfifo tmp2
+ nc -l 8080 -k > tmp < tmp2 &
+ while true; do
+  openssl s_client -connect www.google.com:443 -quiet < tmp > tmp2
+ done
+```
+### 端口扫描
+netcat的不常见用途是端口扫描。Netcat不被认为是这项工作的最佳工具，但它已经足够了（更高级的工具是nmap）
+``` shell
+[root@archlinux ~]# nc -v -n -z -w 1 192.168.1.210 8000-10000
+192.168.1.210 8061 open
+192.168.1.210 8063 open
+192.168.1.210 9998 (distinct32) open
+192.168.1.210 9999 (distinct) open
+[root@archlinux ~]#
+```
+-n此处的参数可防止DNS查找，-z使nc不从服务器接收任何数据，并-w 1在1秒钟不活动后使连接超时。
+结果中的distinct代表使用此端口的已知著名应用
+### 文件传输
+``` shell
+发送方将待发送文件放到流中
+nc -l 192.168.1.156 1234 < readme.txt
+接收方
+nc 192.168.1.156 1234 > readme.txt
+```
+## 参考内容
+
+[^wiki]: https://en.wikipedia.org/wiki/Netcat
+
+
 dmesg -T | grep "(java)"  //查找进程挂掉的信息
 dmesg | tail
 
