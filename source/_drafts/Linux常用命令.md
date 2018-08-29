@@ -89,7 +89,17 @@ nc 192.168.1.156 1234 > readme.txt
 ```
 ## 参考内容
 
-[^wiki]: https://en.wikipedia.org/wiki/Netcat
+## ps
+
+## wc
+
+## sed
+
+## awk
+
+
+
+[^wiki-netcat]: https://en.wikipedia.org/wiki/Netcat
 
 
 dmesg -T | grep "(java)"  //查找进程挂掉的信息
