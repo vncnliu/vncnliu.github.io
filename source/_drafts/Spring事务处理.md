@@ -27,6 +27,10 @@ doGetConnection:103, DataSourceUtils (org.springframework.jdbc.datasource)
 getConnection:78, DataSourceUtils (org.springframework.jdbc.datasource)
 ```
 
+方法通过
+@Transactional(propagation=Propagation.NOT_SUPPORTED)
+标识，表明方法不自动添加事务管理
+
 关于aop
 spring aop通过动态代理实现，动态代理常用有两种
 * 原生Proxy 必须有接口

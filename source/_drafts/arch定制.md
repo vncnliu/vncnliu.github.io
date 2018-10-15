@@ -254,5 +254,15 @@ virtualBox无缝模式启用
 如报模块未找到的错误可手动加载模块
 modprobe vboxdrv
 
+消息提醒
+首先virtualBox虚拟机的硬盘要用固定大小，其次不能开机启动tim，否则会导致设置不能保存。
+配置tim的消息提醒声音文件放在共享文件夹中
+安装xfce4-notifyd
+inotify
+启动脚本
+
+监控消息文件夹可能更精确
+
 office组件
 sudo pacman -S libreoffice-fresh libreoffice-fresh-zh-cn
+
