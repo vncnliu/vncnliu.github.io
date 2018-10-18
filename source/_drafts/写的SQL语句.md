@@ -13,3 +13,41 @@ and action_submit_status=1 and wx_account_id=t.wx_account_id order by time_creat
 FROM voice_robot.t_wx_task t where operate=10031 and time_create>'20180610' and action_submit_status=1
 group by group_id,business_id,wx_account_id,time_day order by group_id,business_id,time_day) t;
 ```
+
+### 定时导入微信任务
+
+```sql
+-- 查看是否开启定时任务功能
+show variables like '%sche%';
+set global event_scheduler =1;
+
+-- 创建存储过程
+CREATE PROCEDURE add_wx_task_from_manual()
+  BEGIN
+    declare wx_num int default 0;
+    select count(*) into wx_num from t_wx_basic_config where business_id=167 and status=1;
+    if(select hour(now())>9 && hour(now())<22)
+      then
+        start transaction;
+        insert into t_wx_task (user_id, group_id, business_id, operate, target_account, message, manual_id, time_create, time_modified)
+        select user_id,group_id,business_id,10031,phone as target_account,message,id,now(),now()
+        from wx_task_manual
+        where status = 0
+        order by id
+        limit wx_num;
+        update wx_task_manual
+        set status = 1
+        where status = 0
+        order by id
+        limit wx_num;
+        commit;
+    end if;
+  END;
+
+-- 创建定时任务,会立即执行一次
+create event if not exists e_add_wx_task_manual
+on schedule every 1 hour
+on completion preserve
+do call add_wx_task_from_manual();
+
+```
