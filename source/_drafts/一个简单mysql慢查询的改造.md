@@ -81,4 +81,154 @@ cleaning up	0.000009
 ```
 可以看到关键耗时就在Creating sort index
 
+下面这两个sql第一个20毫秒，第二个要7秒
+group 前后数据量没区别，但是第二个貌似进行了全表扫描
+```sql
+-- sql1
+explain select t1.origin_wx_id originWxId,
+               t1.target_wx_id targetWxId,
+               t1.wx_nickname  wxNickname,
+               t1.memo,
+               t1.head_picture headPicture,
+               t2.message      lastMessage,
+               t2.time_create  lastMessageTime,
+               t1.type,
+               t1.time_create  createTime
+        from (select f.origin_wx_id, f.target_wx_id, f.wx_nickname, f.memo, f.head_picture, f.type, f.time_create
+              from t_wx_friend f
+              where f.origin_wx_id = 'wxid_rg86z6as66io12'
+              ) t1
+               left join (select *
+                          from t_wx_message_task
+                          where server_account = 'wxid_rg86z6as66io12'
+                            and id in (select max(id)
+                                       from t_wx_message_task
+                                       where action_submit_status = 1
+                                         and action_execution_status = 1
+                                       group by server_account, target_account
+                                       order by time_create desc)) t2 on t1.target_wx_id = t2.target_account
+order by t1.time_create desc limit 100;
 
+-- sql2
+explain select t1.origin_wx_id originWxId,
+               t1.target_wx_id targetWxId,
+               t1.wx_nickname  wxNickname,
+               t1.memo,
+               t1.head_picture headPicture,
+               t2.message      lastMessage,
+               t2.time_create  lastMessageTime,
+               t1.type,
+               t1.time_create  createTime
+        from (select f.origin_wx_id, f.target_wx_id, f.wx_nickname, f.memo, f.head_picture, f.type, f.time_create
+              from t_wx_friend f
+              where f.origin_wx_id = 'wxid_rg86z6as66io12'
+              ) t1
+               left join (select *
+                          from t_wx_message_task
+                            where id in (select max(id)
+                                       from t_wx_message_task
+                                       where action_submit_status = 1
+                                         and action_execution_status = 1
+                                       and server_account = 'wxid_rg86z6as66io12'
+                                       group by server_account, target_account
+                                       order by time_create desc)) t2 on t1.target_wx_id = t2.target_account
+order by t1.time_create desc limit 100;
+```
+
+通过分析执行过程看到sql2使用了临时表，explain也可以看出扫描行数基本和t_wx_message_task表数据总数据量一致。
+看来join时id的检索没有生效，导致扫描数过多，而sql1增加了server_account使数据量大大减少，也就不需要临时表了。
+通过改写sql2将id的限制换成 in(1,2)同样会全表扫描但是使用如下语句
+
+```sql
+-- sql3
+explain select t1.origin_wx_id originWxId,
+               t1.target_wx_id targetWxId,
+               t1.wx_nickname  wxNickname,
+               t1.memo,
+               t1.head_picture headPicture,
+               t2.message      lastMessage,
+               t2.time_create  lastMessageTime,
+               t1.type,
+               t1.time_create  createTime
+        from (select f.origin_wx_id, f.target_wx_id, f.wx_nickname, f.memo, f.head_picture, f.type, f.time_create
+              from batman_local.t_wx_friend f
+              where f.origin_wx_id = 'wxid_rg86z6as66io12'
+              ) t1
+               left join (select *
+                          from batman_local.t_wx_message_task
+                            where id in (select mid from ( select max(id) mid
+                                       from batman_local.t_wx_message_task
+                                       where action_submit_status = 1
+                                         and action_execution_status = 1
+                                       and server_account = 'wxid_rg86z6as66io12'
+                                       group by server_account, target_account
+                                       order by time_create desc) tt)) t2 on t1.target_wx_id = t2.target_account
+order by t1.time_create desc limit 100;
+```
+却能过滤join后的数据，可见mysql对子查询和join的优化还是很复杂
+sql1 sql2 的profile
+```
+-- sql1
+starting	0.000249
+checking permissions	0.000013
+checking permissions	0.000003
+checking permissions	0.000006
+Opening tables	0.000029
+init	0.000172
+System lock	0.000016
+optimizing	0.000021
+statistics	0.000150
+preparing	0.000043
+Sorting result	0.000018
+optimizing	0.000014
+statistics	0.000085
+preparing	0.000037
+Sorting result	0.000007
+executing	0.000003
+Sending data	0.000017
+Creating sort index	0.004661
+end	0.000007
+query end	0.000020
+closing tables	0.000014
+freeing items	0.000018
+removing tmp table	0.000006
+freeing items	0.000202
+cleaning up	0.000028
+
+-- sql2
+starting	0.000237
+checking permissions	0.000007
+checking permissions	0.000003
+checking permissions	0.000006
+Opening tables	0.000030
+init	0.000171
+System lock	0.000015
+optimizing	0.000020
+statistics	0.000171
+preparing	0.000057
+Creating tmp table	0.000060
+Sorting result	0.000013
+optimizing	0.000019
+statistics	0.000175
+preparing	0.000045
+Sorting result	0.000006
+executing	0.000004
+Sending data	1.028974
+executing	0.000004
+Sending data	12.632122
+Creating sort index	0.000465
+end	0.000005
+query end	0.000013
+removing tmp table	0.000184
+query end	0.000008
+closing tables	0.000013
+freeing items	0.000018
+removing tmp table	0.000004
+freeing items	0.000120
+cleaning up	0.000019
+
+```
+explain
+{% asset_img sql1.png sql1 %}
+{% asset_img sql2.png sql2 %}
+{% asset_img sql3.png sql3 %}

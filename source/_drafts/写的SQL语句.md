@@ -50,4 +50,13 @@ on schedule every 1 hour
 on completion preserve
 do call add_wx_task_from_manual();
 
+-- 查看状态
+SELECT * FROM information_schema.EVENTS;
+
+-- 启用
+alter event e_add_wx_task_manual on completion preserve enable;
+
+-- 停用
+alter event e_add_wx_task_manual on completion preserve disable;
+
 ```
