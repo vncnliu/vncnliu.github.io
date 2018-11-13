@@ -266,3 +266,59 @@ inotify
 office组件
 sudo pacman -S libreoffice-fresh libreoffice-fresh-zh-cn
 
+安装 tmux, fish
+tmux.conf
+```bash
+code@archlinux ~> more .tmux.conf
+set -g prefix C-a
+set -g base-index         1     # 窗口编号从 1 开始计数
+set -g display-panes-time 10000 # PREFIX-Q 显示编号保留时间，单位 ms
+set -g mouse              on    # 开启鼠标
+set -g pane-base-index    1     # 窗格编号从 1 开始计数
+set -g renumber-windows   on    # 关掉某个窗口后，编号重排
+set-option -g default-shell "/usr/bin/fish"  #默认使用fish
+
+setw -g allow-rename      off   # 禁止活动进程修改窗口名
+setw -g automatic-rename  off   # 禁止自动命名新窗口
+
+#配置复制模式
+#前缀 [ 进入复制模式
+#按 space 开始复制，移动光标选择复制区域
+#按 Enter(与plugin-yank结合使用y可同时复制到系统剪贴板) 复制并退出copy-mode。
+#将光标移动到指定位置，按 PREIFX ] 粘贴
+setw -g mode-keys vi
+
+bind C-v run "tmux set-buffer \"$(xclip -o -sel clipboard)\" ; tmux paste-buffer "
+
+# -----------------------------------------------------------------------------
+# 使用插件 - via tpm
+#   1. 执行 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+#   2. 执行 bash ~/.tmux/plugins/tpm/bin/install_plugins
+# -----------------------------------------------------------------------------
+
+setenv -g TMUX_PLUGIN_MANAGER_PATH '~/.tmux/plugins'
+
+# 推荐的插件（请去每个插件的仓库下读一读使用教程）
+# set -g @plugin 'seebi/tmux-colors-solarized'
+set -g @plugin 'tmux-plugins/tmux-pain-control'
+set -g @plugin 'tmux-plugins/tmux-prefix-highlight'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+# set -g @plugin 'tmux-plugins/tmux-sensible'
+set -g @plugin 'tmux-plugins/tmux-yank'
+set -g @plugin 'tmux-plugins/tpm'
+
+# tmux-resurrect
+set -g @resurrect-dir '~/.tmux/resurrect'
+
+# tmux-prefix-highlight
+set -g status-right '#{prefix_highlight} #H | %a %Y-%m-%d %H:%M'
+set -g @prefix_highlight_show_copy_mode 'on'
+set -g @prefix_highlight_copy_mode_attr 'fg=white,bg=blue'
+
+# 初始化 TPM 插件管理器 (放在配置文件的最后)
+run '~/.tmux/plugins/tpm/tpm'
+
+# -----------------------------------------------------------------------------
+# 结束
+# -----------------------------------------------------------------------------
+```
