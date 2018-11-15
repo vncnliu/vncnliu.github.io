@@ -322,3 +322,15 @@ run '~/.tmux/plugins/tpm/tpm'
 # 结束
 # -----------------------------------------------------------------------------
 ```
+
+只安装redis-cli
+```bash
+wget http://download.redis.io/redis-stable.tar.gz
+tar xvzf redis-stable.tar.gz
+cd redis-stable
+make
+sudo cp src/redis-cli /usr/local/bin/
+```
+
+音频处理软件
+audacity
