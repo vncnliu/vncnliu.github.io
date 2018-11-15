@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>造轮子之HttpServer（一） | Attack On Vncnliu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="这里的HttpServer就是一个解析http协议的程序，大家都知道http协议是基于tcp/ip协议的。tcp/ip算是比较底层的了，操作系统基本都通过socket对其进行管理，用java很容易就能写一个简单的server1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484">
+<meta name="keywords" content="http,socket">
+<meta property="og:type" content="article">
+<meta property="og:title" content="造轮子之HttpServer（一）">
+<meta property="og:url" content="http://blog.vncnliu.top/2016/08/12/造轮子之HttpServer（一）/index.html">
+<meta property="og:site_name" content="Attack On Vncnliu">
+<meta property="og:description" content="这里的HttpServer就是一个解析http协议的程序，大家都知道http协议是基于tcp/ip协议的。tcp/ip算是比较底层的了，操作系统基本都通过socket对其进行管理，用java很容易就能写一个简单的server1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-11-15T04:51:46.960Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="造轮子之HttpServer（一）">
+<meta name="twitter:description" content="这里的HttpServer就是一个解析http协议的程序，大家都知道http协议是基于tcp/ip协议的。tcp/ip算是比较底层的了，操作系统基本都通过socket对其进行管理，用java很容易就能写一个简单的server1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484">
+  
+    <link rel="alternate" href="/atom.xml" title="Attack On Vncnliu" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  
+    
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://blog.vncnliu.top"></form>
+      </div>
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">首页</a>
+        
+          <a class="main-nav-link" href="/archives">归档</a>
+        
+      </nav>
+      
+    </div>
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Attack On Vncnliu</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">内有野生程序猿</a>
+        </h2>
+      
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-造轮子之HttpServer（一）" class="article article-type-post" itemscope="" itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/08/12/造轮子之HttpServer（一）/" class="article-date">
+  <time datetime="2016-08-12T00:25:17.000Z" itemprop="datePublished">2016-08-12</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/造轮子/">造轮子</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      造轮子之HttpServer（一）
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        
+        
+          <p>这里的HttpServer就是一个解析http协议的程序，大家都知道http协议是基于tcp/ip协议的。tcp/ip算是比较底层的了，操作系统基本都通过socket对其进行管理，用java很容易就能写一个简单的server<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> cc.vicp.vncnliu.attackServer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.BufferedReader;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.io.InputStreamReader;</span><br><span class="line"><span class="keyword">import</span> java.io.PrintWriter;</span><br><span class="line"><span class="keyword">import</span> java.net.ServerSocket;</span><br><span class="line"><span class="keyword">import</span> java.net.Socket;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 简单的http解析器</span></span><br><span class="line"><span class="comment"> * created on 2016/8/10 15:11.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> vncnliu</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@version</span> default 1.0.0</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HttpServer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">//绑定端口</span></span><br><span class="line">            ServerSocket serverSocket  = <span class="keyword">new</span> ServerSocket(<span class="number">8080</span>);</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>)&#123;</span><br><span class="line">                Socket socket = serverSocket.accept();</span><br><span class="line">                <span class="keyword">new</span> Thread(<span class="keyword">new</span> MessageHandle(socket)).start();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MessageHandle</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        Socket socket;</span><br><span class="line">        MessageHandle(Socket socket)&#123;</span><br><span class="line">            <span class="keyword">this</span>.socket = socket;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            StringBuilder echo = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">            BufferedReader in = <span class="keyword">null</span>;</span><br><span class="line">            PrintWriter out = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                in = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> InputStreamReader(<span class="keyword">this</span>.socket.getInputStream()));</span><br><span class="line">                out = <span class="keyword">new</span> PrintWriter(<span class="keyword">this</span>.socket.getOutputStream(),<span class="keyword">true</span>);</span><br><span class="line">                String body = <span class="keyword">null</span>;</span><br><span class="line">                <span class="keyword">while</span>(<span class="keyword">true</span>) &#123;</span><br><span class="line">                    body = in.readLine();</span><br><span class="line">                    <span class="keyword">if</span>(body==<span class="keyword">null</span>)&#123;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    System.out.println(body);</span><br><span class="line">                &#125;</span><br><span class="line">                echo.append(<span class="string">"HTTP/1.1 200 \r\n"</span>);</span><br><span class="line">                echo.append(<span class="string">"Content-Type: text/html\r\n"</span>);</span><br><span class="line">                echo.append(<span class="string">"Content-Length: 109\r\n"</span>);</span><br><span class="line">                echo.append(<span class="string">"\r\n"</span>);</span><br><span class="line">                echo.append(<span class="string">"&lt;html&gt;"</span>);</span><br><span class="line">                echo.append(<span class="string">"&lt;head&gt;"</span>);</span><br><span class="line">                echo.append(<span class="string">"&lt;title&gt;hello&lt;/title&gt;"</span>);</span><br><span class="line">                echo.append(<span class="string">"&lt;/head&gt;"</span>);</span><br><span class="line">                echo.append(<span class="string">"&lt;body&gt;"</span>);</span><br><span class="line">                echo.append(<span class="string">"&lt;center&gt;"</span>);</span><br><span class="line">                echo.append(<span class="string">"&lt;b1&gt;Welcome to my home page.&lt;/b1&gt;"</span>);</span><br><span class="line">                echo.append(<span class="string">"&lt;/center&gt;"</span>);</span><br><span class="line">                echo.append(<span class="string">"&lt;/body&gt;"</span>);</span><br><span class="line">                echo.append(<span class="string">"&lt;/html&gt;"</span>);</span><br><span class="line">                out.println(echo.toString());</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">finally</span> &#123;</span><br><span class="line">                System.out.println(<span class="string">"链接关闭"</span>);</span><br><span class="line">                <span class="keyword">if</span>(in!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        in.close();</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (Exception e2) &#123;</span><br><span class="line">                        e2.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span>(out!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                    out.close();</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span>(<span class="keyword">this</span>.socket!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        <span class="keyword">this</span>.socket.close();</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (IOException e1) &#123;</span><br><span class="line">                        e1.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">this</span>.socket=<span class="keyword">null</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>代码很简单,但是跑起来就不按我想的来了。浏览器输入<a href="http://localhost:8080/结果圈圈一直转个不停" target="_blank" rel="noopener">http://localhost:8080/结果圈圈一直转个不停</a><br><br>程序控制台输出如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">GET / HTTP/1.1</span><br><span class="line">Host: localhost:8080</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Upgrade-Insecure-Requests: 1</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8</span><br><span class="line">Accept-Encoding: gzip, deflate, sdch</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.8</span><br></pre></td></tr></table></figure></p>
+<p>可以看到没有走到finally里，那到底哪里阻塞住了呢？输出程序的threads dump<br></p>
+<blockquote>
+<p>有兴趣的可以看一下idea的threads dump 的文档在<a href="https://www.jetbrains.com/help/idea/2016.2/debug-tool-window-dump.html" target="_blank" rel="noopener">这里</a></p>
+</blockquote>
+<p>可以看到第二个线程是在等待网络数据，这里就要牵扯到http协议了，一个http请求使用tcp/ip协议建立一个socket链接等待response返回数据后关闭链接，InputStream关闭后系统会发送EOF这是read就会返回-1表明流读完了，而请求没有收到返回必然不会关闭链接所以这里会阻塞在socket的inputStream的fill方法。<br>这里需要结合http协议改变一下代码<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> cc.vicp.vncnliu.attackServer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.BufferedReader;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.io.InputStreamReader;</span><br><span class="line"><span class="keyword">import</span> java.io.PrintWriter;</span><br><span class="line"><span class="keyword">import</span> java.net.ServerSocket;</span><br><span class="line"><span class="keyword">import</span> java.net.Socket;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 简单的http解析器</span></span><br><span class="line"><span class="comment"> * created on 2016/8/10 15:11.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> vncnliu</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@version</span> default 1.0.0</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HttpServer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">//绑定端口</span></span><br><span class="line">            ServerSocket serverSocket  = <span class="keyword">new</span> ServerSocket(<span class="number">8080</span>);</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>)&#123;</span><br><span class="line">                Socket socket = serverSocket.accept();</span><br><span class="line">                <span class="keyword">new</span> Thread(<span class="keyword">new</span> MessageHandle(socket)).start();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MessageHandle</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        Socket socket;</span><br><span class="line">        MessageHandle(Socket socket)&#123;</span><br><span class="line">            <span class="keyword">this</span>.socket = socket;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            StringBuilder echo = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">            BufferedReader in = <span class="keyword">null</span>;</span><br><span class="line">            PrintWriter out = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">int</span> contentSize = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                in = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> InputStreamReader(<span class="keyword">this</span>.socket.getInputStream()));</span><br><span class="line">                out = <span class="keyword">new</span> PrintWriter(<span class="keyword">this</span>.socket.getOutputStream(),<span class="keyword">true</span>);</span><br><span class="line">                String body = <span class="keyword">null</span>;</span><br><span class="line">                <span class="keyword">while</span>(<span class="keyword">true</span>) &#123;</span><br><span class="line">                    body = in.readLine();</span><br><span class="line">                    <span class="keyword">if</span>(body==<span class="keyword">null</span>)&#123;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">if</span>(<span class="string">""</span>.equals(body))&#123;</span><br><span class="line">                        <span class="comment">//开始读取主题部分，Content-Length为主体大小，</span></span><br><span class="line">                        <span class="keyword">char</span>[] content = <span class="keyword">new</span> <span class="keyword">char</span>[contentSize];</span><br><span class="line">                        in.read(content);</span><br><span class="line">                        System.out.println(content);</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">if</span>(<span class="string">"Content-Length"</span>.equals(body.split(<span class="string">":"</span>)[<span class="number">0</span>]))&#123;</span><br><span class="line">                        contentSize = Integer.parseInt(body.split(<span class="string">":"</span>)[<span class="number">1</span>].trim());</span><br><span class="line">                    &#125;</span><br><span class="line">                    System.out.println(body);</span><br><span class="line">                &#125;</span><br><span class="line">                echo.append(<span class="string">"HTTP/1.1 200 \r\n"</span>);</span><br><span class="line">                echo.append(<span class="string">"Content-Type: text/html\r\n"</span>);</span><br><span class="line">                echo.append(<span class="string">"Content-Length: 109\r\n"</span>);</span><br><span class="line">                echo.append(<span class="string">"\r\n"</span>);</span><br><span class="line">                echo.append(<span class="string">"&lt;html&gt;"</span>);</span><br><span class="line">                echo.append(<span class="string">"&lt;head&gt;"</span>);</span><br><span class="line">                echo.append(<span class="string">"&lt;title&gt;hello&lt;/title&gt;"</span>);</span><br><span class="line">                echo.append(<span class="string">"&lt;/head&gt;"</span>);</span><br><span class="line">                echo.append(<span class="string">"&lt;body&gt;"</span>);</span><br><span class="line">                echo.append(<span class="string">"&lt;center&gt;"</span>);</span><br><span class="line">                echo.append(<span class="string">"&lt;b1&gt;Welcome to my home page.&lt;/b1&gt;"</span>);</span><br><span class="line">                echo.append(<span class="string">"&lt;/center&gt;"</span>);</span><br><span class="line">                echo.append(<span class="string">"&lt;/body&gt;"</span>);</span><br><span class="line">                echo.append(<span class="string">"&lt;/html&gt;"</span>);</span><br><span class="line">                out.println(echo.toString());</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">finally</span> &#123;</span><br><span class="line">                System.out.println(<span class="string">"链接关闭"</span>);</span><br><span class="line">                <span class="keyword">if</span>(in!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        in.close();</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (Exception e2) &#123;</span><br><span class="line">                        e2.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span>(out!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                    out.close();</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span>(<span class="keyword">this</span>.socket!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        <span class="keyword">this</span>.socket.close();</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (IOException e1) &#123;</span><br><span class="line">                        e1.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">this</span>.socket=<span class="keyword">null</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>参考http权威指南里的说法</p>
+<blockquote>
+<p>HTTP 报文是简单的格式化数据块。每条报文都包含一条来自客户端的请求，或者一条来自服务器的响应。它们由三个部分组成：对报文进行描述的起始行（start line）、包含属性的首部（header）块，以及可选的、包含数据的主体（body）部分。<br> 起始行和首部就是由行分隔的 ASCII 文本。每行都以一个由两个字符组成的行终止序列作为结束，其中包括一个回车符（ASCII 码 13）和一个换行符（ASCII 码 10）。这个行终止序列可以写做 CRLF。需要指出的是，尽管 HTTP 规范中说明应该用 CRLF 来表示行终止，但稳健的应用程序也应该接受单个换行符作为行的终止。有些老的，或不完整的 HTTP 应用程序并不总是既发送回车符，又发送换行符。<br> 实体的主体或报文的主体（或者就称为主体）是一个可选的数据块。与起始行和首部不同的是，主体中可以包含文本或二进制数据，也可以为空。<br> Content-Type 行说明了主体是什么——在这个例子中，就是纯文本文档。Content-Length 行说明了主体有多大</p>
+</blockquote>
+<p> 所以只要把Content-Length读取完就可以发送response了</p>
+<blockquote>
+<p>如果为get方法是没有Content-Length也可以认为Content-Length为0<br> </p>
+</blockquote>
+
+        
+      
+    </div>
+
+    <footer class="article-footer">
+      <a data-url="http://blog.vncnliu.top/2016/08/12/造轮子之HttpServer（一）/" data-id="cjoi4bc21002g1ordkt5s8p05" class="article-share-link">分享</a>
+      
+      
+        <a href="http://blog.vncnliu.top/2016/08/12/造轮子之HttpServer（一）/#disqus_thread" class="article-comment-link">留言</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/http/">http</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/socket/">socket</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+ <script src="/jquery/jquery.min.js"></script>
+  <div id="random_posts">
+    <h2>推荐文章</h2>
+    <div class="random_posts_ul">
+      <script>
+          var random_count =3
+          var site = {BASE_URI:'/'};
+          function load_random_posts(obj) {
+              var arr=site.posts;
+              if (!obj) return;
+              // var count = $(obj).attr('data-count') || 6;
+              for (var i, tmp, n = arr.length; n; i = Math.floor(Math.random() * n), tmp = arr[--n], arr[n] = arr[i], arr[i] = tmp);
+              arr = arr.slice(0, random_count);
+              var html = '<ul>';
+            
+              for(var j=0;j<arr.length;j++){
+                var item=arr[j];
+                html += '<li><strong>' + 
+                item.date + ':&nbsp;&nbsp;<a href="' + (site.BASE_URI+item.uri) + '">' + 
+                (item.title || item.uri) + '</a></strong>';
+                if(item.excerpt){
+                  html +='<div class="post-excerpt">'+item.excerpt+'</div>';
+                }
+                html +='</li>';
+                
+              }
+              $(obj).html(html + '</ul>');
+          }
+          $('.random_posts_ul').each(function () {
+              var c = this;
+              if (!site.posts || !site.posts.length){
+                  $.getJSON(site.BASE_URI + 'js/posts.js',function(json){site.posts = json;load_random_posts(c)});
+              } 
+               else{
+                load_random_posts(c);
+              }
+          });
+      </script>
+    </div>
+  </div>
+
+    
+<nav id="article-nav">
+  
+    <a href="/2017/01/21/tcpcopy在阿里云ECS中的使用/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">
+        
+          tcpcopy在阿里云ECS中的使用
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/04/20/java读取部分excel文件实现excel文件的预览/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">java读取部分excel文件实现excel文件的预览</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+ 
+     
+  <div class="comments" id="comments">
+    
+     
+    <section id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+      </section>
+      
+       
+       
+      
+      
+  </div>
+ 
+  
+
+</section>
+           
+    <aside id="sidebar">
+  
+    
+
+  
+    
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title recent-posts">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/04/25/我认为LengthFieldBasedFrameDecoder的正确使用方式/">我认为LengthFieldBasedFrameDecoder的正确使用方式</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/21/tcpcopy在阿里云ECS中的使用/">tcpcopy在阿里云ECS中的使用</a>
+          </li>
+        
+          <li>
+            <a href="/2016/08/12/造轮子之HttpServer（一）/">造轮子之HttpServer（一）</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/20/java读取部分excel文件实现excel文件的预览/">java读取部分excel文件实现excel文件的预览</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/18/junit多线程测试/">junit多线程测试</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    
+
+  
+    
+  
+    <!--微信公众号二维码-->
+
+
+  
+</aside>
+
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-left">
+      &copy; 2014 - 2018 Vncnliu&nbsp;|&nbsp;
+      主题 <a href="https://github.com/giscafer/hexo-theme-cafe/" target="_blank">Cafe</a>
+    </div>
+     <div id="footer-right">
+      联系方式&nbsp;|&nbsp;vncnliu@gmail.com
+    </div>
+  </div>
+</footer>
+ <script src="/jquery/jquery.min.js"></script>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">首页</a>
+  
+    <a href="/archives" class="mobile-nav-link">归档</a>
+  
+</nav>
+    <img class="back-to-top-btn" src="/images/fly-to-top.png">
+<script>
+// Elevator script included on the page, already.
+window.onload = function() {
+  var elevator = new Elevator({
+    selector:'.back-to-top-btn',
+    element: document.querySelector('.back-to-top-btn'),
+    duration: 1000 // milliseconds
+  });
+}
+</script>
+      
+
+<script>
+  var disqus_shortname = 'blog-vncnliu-top';
+  
+  var disqus_url = 'http://blog.vncnliu.top/2016/08/12/造轮子之HttpServer（一）/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+
+
+
+
+
+<!-- author:forvoid begin -->
+<!-- author:forvoid begin -->
+
+<!-- author:forvoid end -->
+
+<!-- author:forvoid end -->
+
+
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      })
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      })
+    </script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/mathjax/MathJax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+ <script src="/js/is.js"></script>
+
+
+
+<script src="/js/script.js"></script>
+<script src="/js/elevator.js"></script>
+  </div>
+</body>
+</html>
